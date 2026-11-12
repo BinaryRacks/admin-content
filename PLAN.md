@@ -40,7 +40,7 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 19 | How is the client's time zone worked out? | **From the client's country, plus state** for countries with several time zones (e.g. US, CA, AU, BR, MX, RU). Uses PHP's built-in time zone list. If unsure, falls back to the WHMCS system time zone. |
 | 20 | Where do "server down" notifications come from? | **Dropped, not built.** So the only critical message that skips the daytime rule is **service suspension**. |
 | 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
-| 22 | What does a "STOP" reply do? | **Stops WhatsApp only:** it ticks the client's `disable_whatsapp` field, so no more WhatsApp messages are sent. The WHMCS marketing opt-in is never touched. |
+| 22 | What does a "STOP" reply do? | **Stops WhatsApp only:** it ticks the client's `disable_whatsapp` field, so no more WhatsApp messages are sent, **and writes an entry in the module's message log** (client, phone number, date and time, "Customer requested STOP via WhatsApp, disable_whatsapp ticked"). The WHMCS marketing opt-in is never touched. |
 | 23 | Is an ID verification reminder needed? | **No. Removed from the module completely.** |
 
 ## The build plan (version 1.0.0)
