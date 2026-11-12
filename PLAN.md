@@ -23,7 +23,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 2 | Which WhatsApp provider? | **Meta WhatsApp Cloud API (official).** Sending goes through a separate provider file, so another provider can be added later. Webhooks are checked against Meta's signature (`X-Hub-Signature-256`, signed with the app secret). |
 | 3 | Do you already have a Meta Business account and a WhatsApp Business number? | **Yes, fully set up.** The admin settings will ask for the Phone Number ID, WhatsApp Business Account ID, access token, app secret and webhook verify token. All secrets are stored with WHMCS `encrypt()` and never shown again. |
 | 4 | Which phone number do messages go to? | **The client's main WHMCS phone number**, with its country code. It's converted to international format (E.164). Numbers that are invalid or missing are skipped, and the skip is logged. |
-| 5 | How are notifications linked to Meta's approved message templates? | _waiting for answer_ |
+| 5 | How are notifications linked to Meta's approved message templates? | **Admin types the template name and language**, then picks the WHMCS data that fills each blank (`{{1}}`, `{{2}}` ...) from a fixed, allowed list. The name is checked for format (lowercase letters, numbers, `_`, at most 512 characters). A **"Send test"** button is suggested, so a typo shows up straight away. |
+| 6 | What does `disable_whatsapp` switch off? | _waiting for answer_ |
 
 ## Waiting for
 
