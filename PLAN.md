@@ -34,7 +34,7 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 13 | How does the module know a client still needs ID verification? | **Not needed:** replaced by decision 23 (the ID reminder is removed). |
 | 14 | How long are sent-message logs kept? | **90 days** by default, changeable in settings. Old entries are deleted automatically by the daily cron. The log never stores tokens or secrets. |
 | 15 | What happens when a client replies on WhatsApp? | **Ignored.** The webhook only processes delivery receipts (sent, delivered, read, failed) and "STOP"-type opt-outs. Other replies are thrown away and their text is not stored. Suggestion: the templates should say "replies are not monitored, please open a ticket". |
-| 16 | How flexible are new pre-configured messages? | _being discussed again; my first reading of "ignore for now" was wrong_ |
+| 16 | How flexible are new pre-configured messages? | **Manual only.** The admin can add new messages (name, Meta template name, language and blank mapping from the allowed list) in a "Manual messages" tab. They can only be sent by hand from the client profile. New automatic triggers need a module update. |
 | 17 | Which language are messages sent in? | **One language for all messages**, set once in the settings (e.g. `en` or `en_GB`). The format is checked: 2 letters, optionally followed by `_` and 2 more. Each message can override it if needed. |
 | 18 | Should messages wait during quiet hours (e.g. at night)? | **Daytime only: 08:00 to 18:00 in the client's own time zone.** Messages triggered outside those hours are queued and sent by the cron when the client's daytime starts. **Critical messages go immediately at any hour:** service suspension and server down notices. |
 | 19 | How is the client's time zone worked out? | **From the client's country, plus state** for countries with several time zones (e.g. US, CA, AU, BR, MX, RU). Uses PHP's built-in time zone list. If unsure, falls back to the WHMCS system time zone. |
@@ -105,8 +105,9 @@ This holds even on "nginx only", where `.htaccess` is ignored. `webhook.php` is 
    **ticks that client's `disable_whatsapp` field** through `localAPI UpdateClient`, which stops all WhatsApp messages to them. The WHMCS marketing opt-in is never touched. Other replies are ignored and not stored.
 7. **Settings tab.** Meta Phone Number ID, Business Account ID, access token, app secret, verify token (secrets are typed in, never shown again),
    language, batch size, daily cap, log retention, roles for each job, and "Delete data on deactivate" (off by default).
-8. **Notifications tab.** Category switches, event checklist, template name, language and blank mapping for each event, and a "Send test" button that sends to a number you type.
-9. **Log tab.** Search by client, status and date.
+8. **Manual messages tab.** Add, edit, disable and delete manual messages (the due invoice reminder comes pre-made).
+9. **Notifications tab.** Category switches, event checklist, template name, language and blank mapping for each event, and a "Send test" button that sends to a number you type.
+10. **Log tab.** Search by client, status and date.
 
 ### Database tables (created and upgraded automatically)
 `mod_brwa_settings`, `mod_brwa_messages` (event and manual messages), `mod_brwa_queue`, `mod_brwa_log`,
