@@ -28,7 +28,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 7 | Who creates the `disable_whatsapp` custom field? | **The module creates it on activation** if it doesn't exist: a tickbox that clients can edit, shown on their profile. An existing field with the same name is reused. It's never deleted on deactivate (client choices are kept). |
 | 8 | Which automatic events go on the admin checklist? | **All groups:** Invoices (created, reminder due or overdue, payment received), Services (activated or welcome, suspended with reason, unsuspended, terminated), Tickets (staff reply), Domains (registered, renewed, expiring soon). Admin can **switch a whole category on or off** with one switch, and can also turn single events on or off inside a category. A message is sent only if both its category and its event are on. |
 | 9 | Which "marketing enabled" setting decides who gets bulk marketing? | **WHMCS's built-in email marketing opt-in** (the client's "marketing emails" setting). A client gets bulk marketing only if that is on **and** `disable_whatsapp` is not ticked. *Risk you accepted:* that consent was given for email, not WhatsApp, so Meta may treat it as weaker consent. Incoming "STOP" replies (through the webhook) will untick it automatically. |
-| 10 | Where does the admin send manual messages from? | _waiting for answer_ |
+| 10 | Where does the admin send manual messages from? | **Client profile page only.** A "Send WhatsApp" button on the admin client summary page, added with an official WHMCS admin hook (no core edits). It opens a small form: choose a pre-configured message, see a preview, and send. The form uses POST with a CSRF token. |
+| 11 | Which admins may send messages, run bulk marketing and change settings? | _waiting for answer_ |
 
 ## Waiting for
 
