@@ -21,7 +21,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 |---|----------|----------|
 | 1 | Admin only, or Client and internet access required? | **Client and internet, very limited.** One public entry point only: a webhook that receives messages and receipts from WhatsApp's servers. It has signature checks, rate limits and strict input checks, and everything else in the module folder is denied. |
 | 2 | Which WhatsApp provider? | **Meta WhatsApp Cloud API (official).** Sending goes through a separate provider file, so another provider can be added later. Webhooks are checked against Meta's signature (`X-Hub-Signature-256`, signed with the app secret). |
-| 3 | Do you already have a Meta Business account and a WhatsApp Business number? | _waiting for answer_ |
+| 3 | Do you already have a Meta Business account and a WhatsApp Business number? | **Yes, fully set up.** The admin settings will ask for the Phone Number ID, WhatsApp Business Account ID, access token, app secret and webhook verify token. All secrets are stored with WHMCS `encrypt()` and never shown again. |
+| 4 | Which phone number do messages go to? | _waiting for answer_ |
 
 ## Waiting for
 
