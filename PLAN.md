@@ -42,8 +42,6 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
 | 22 | What does a "STOP" reply do? | **Stops WhatsApp only:** it ticks the client's `disable_whatsapp` field, so no more WhatsApp messages are sent. The WHMCS marketing opt-in is never touched. |
 | 23 | Is an ID verification reminder needed? | **No. Removed from the module completely.** |
-| 24 | Show a hint when a customer stopped WhatsApp by replying STOP? | **Yes, in the module's message log only.** A log entry: "disable_whatsapp ticked: Disabled by customer request via WhatsApp message", with the date and time. Nothing is added to the client profile or client notes. Searchable in the Log tab. |
-| 25 | Can other modules send WhatsApp messages through this one? | **Yes, through `lib/SendApi.php`** (you had no preference, so this is the recommended option). Other modules call `\BinaryRacks\WhatsApp\SendApi::send(clientId, messageKey, values, caller)` after checking `class_exists`. Only modules ticked in settings may call it, and only messages marked "available to other modules" can be used (no free text). Consent, the daytime rule, value checks, a rate limit for each module and logging (including which module asked) all still apply. A guide is included in `docs/`. |
 
 ## The build plan (version 1.0.0)
 
@@ -80,11 +78,9 @@ modules/addons/br_whatsapp/
     RateLimiter.php         Limits for the webhook and for admin send buttons
     WebhookHandler.php      Signature check, then receipts and STOP handling
     EventHandler.php        Turns a WHMCS event into a queued message (with a duplicate guard)
-    SendApi.php             Door for OTHER modules: checked, rate-limited send of a pre-set message
     views/                  Admin page tabs (all output escaped)
 docs/
   README.md                 Install, Meta setup, nginx rules, upgrade steps, testing notes
-  CONNECT-YOUR-MODULE.md    How another WHMCS module sends a WhatsApp message through SendApi
 tests/                      Automated tests (not uploaded to the server)
 ```
 Every PHP file except `webhook.php` starts with `if (!defined('WHMCS')) { exit; }`, so opening it directly shows nothing.
@@ -109,9 +105,9 @@ This holds even on "nginx only", where `.htaccess` is ignored. `webhook.php` is 
    **ticks that client's `disable_whatsapp` field** through `localAPI UpdateClient`, which stops all WhatsApp messages to them. The WHMCS marketing opt-in is never touched. Other replies are ignored and not stored.
 7. **Settings tab.** Meta Phone Number ID, Business Account ID, access token, app secret, verify token (secrets are typed in, never shown again),
    language, batch size, daily cap, log retention, roles for each job, and "Delete data on deactivate" (off by default).
-8. **Manual messages tab.** Add, edit, disable and delete manual messages (the due invoice reminder comes pre-made). Each message has a tick box: "available to other modules".
+8. **Manual messages tab.** Add, edit, disable and delete manual messages (the due invoice reminder comes pre-made).
 9. **Notifications tab.** Category switches, event checklist, template name, language and blank mapping for each event, and a "Send test" button that sends to a number you type.
-10. **Log tab.** Search by client, status, date and source (event, admin, campaign, other module, webhook STOP).
+10. **Log tab.** Search by client, status and date.
 
 ### Database tables (created and upgraded automatically)
 `mod_brwa_settings`, `mod_brwa_messages` (event and manual messages), `mod_brwa_queue`, `mod_brwa_log`,
@@ -131,7 +127,6 @@ Deactivating keeps all of these unless "Delete data on deactivate" is ticked. Th
 | CSRF (forged admin forms) | Every change uses POST plus a token that is checked. |
 | SQL injection | Capsule query builder with bound values only. |
 | An admin doing more than allowed | Role check on the server for every action, not just hidden buttons. |
-| Another module misusing SendApi (spam, wrong client, odd text) | Caller must be in the allowed list; only pre-set messages; values checked for length and characters; a rate limit for each caller; every call logged with the caller's name. |
 | Messaging a client who opted out | Consent is checked when queued AND again just before sending. |
 | Wrong client or number | Phone numbers turned into international format and checked. STOP matches clients by their normalised number. |
 | **Accepted risk:** marketing uses the email opt-in (decision 9), which was given for email rather than WhatsApp. | STOP ticks `disable_whatsapp` only; the email opt-in is never changed by the module. |
