@@ -30,7 +30,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 9 | Which "marketing enabled" setting decides who gets bulk marketing? | **WHMCS's built-in email marketing opt-in** (the client's "marketing emails" setting). A client gets bulk marketing only if that is on **and** `disable_whatsapp` is not ticked. *Risk you accepted:* that consent was given for email, not WhatsApp, so Meta may treat it as weaker consent. Incoming "STOP" replies (through the webhook) will untick it automatically. |
 | 10 | Where does the admin send manual messages from? | **Client profile page only.** A "Send WhatsApp" button on the admin client summary page, added with an official WHMCS admin hook (no core edits). It opens a small form: choose a pre-configured message, see a preview, and send. The form uses POST with a CSRF token. |
 | 11 | Which admins may send messages, run bulk marketing and change settings? | **Roles are chosen in the module settings, one list per job:** (a) send to one client, (b) send bulk marketing, (c) change settings, tokens and templates. Defaults: (a) all roles with module access, (b) and (c) Full Administrator only. Full Administrator can always reach the settings, so nobody gets locked out. Permissions are checked on the server for every action, not just by hiding buttons. |
-| 12 | How are bulk marketing messages sent? | _waiting for answer_ |
+| 12 | How are bulk marketing messages sent? | **Queued, and sent by WHMCS's own cron** in small batches. The admin sets a batch size and a daily cap to stay under Meta's limits. A campaign can be previewed (number of recipients), paused, resumed or cancelled. Consent (`disable_whatsapp` and the marketing opt-in) is checked again just before each message is sent. No new cron job is needed; it uses the WHMCS `AfterCronJob` hook. |
+| 13 | How does the module know a client still needs ID verification? | _waiting for answer_ |
 
 ## Waiting for
 
