@@ -36,7 +36,9 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 15 | What happens when a client replies on WhatsApp? | **Ignored.** The webhook only processes delivery receipts (sent, delivered, read, failed) and "STOP"-type opt-outs. Other replies are thrown away and their text is not stored. Suggestion: the templates should say "replies are not monitored, please open a ticket". |
 | 16 | How flexible are new pre-configured messages? | **Postponed.** Version 1 lets the admin add extra *manual* messages (template name plus blanks), which the ID verification and invoice reminders need anyway. Custom *automatic* triggers are left for a later version, and the code is laid out so they can be added without a rewrite. |
 | 17 | Which language are messages sent in? | **One language for all messages**, set once in the settings (e.g. `en` or `en_GB`). The format is checked: 2 letters, optionally followed by `_` and 2 more. Each message can override it if needed. |
-| 18 | Should messages wait during quiet hours (e.g. at night)? | _waiting for answer_ |
+| 18 | Should messages wait during quiet hours (e.g. at night)? | **Daytime only: 08:00 to 18:00 in the client's own time zone.** Messages triggered outside those hours are queued and sent by the cron when the client's daytime starts. **Critical messages go immediately at any hour:** service suspension and server down notices. |
+| 19 | How is the client's time zone worked out? | _waiting for answer_ |
+| 20 | Where do "server down" notifications come from? | _waiting for answer_ (new feature, raised in answer 18) |
 
 ## Waiting for
 
