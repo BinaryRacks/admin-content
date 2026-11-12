@@ -8,7 +8,7 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 2. Admin config page with a **checklist of notifications** that are pre-selected (turned on/off by the admin).
 3. A client custom field called **`disable_whatsapp`** so a customer can turn WhatsApp messages off themselves.
 4. Admin can send messages manually, for example:
-   - ID verification reminder
+   - ~~ID verification reminder~~ (removed, decision 23)
    - Due invoice reminder
 5. Automatic messages when a service is **suspended (with the reason)** and **unsuspended**.
 6. Room to **add more pre-configured messages** later, when the business wants to automate other communications.
@@ -31,7 +31,7 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 10 | Where does the admin send manual messages from? | **Client profile page only.** A "Send WhatsApp" button on the admin client summary page, added with an official WHMCS admin hook (no core edits). It opens a small form: choose a pre-configured message, see a preview, and send. The form uses POST with a CSRF token. |
 | 11 | Which admins may send messages, run bulk marketing and change settings? | **Roles are chosen in the module settings, one list per job:** (a) send to one client, (b) send bulk marketing, (c) change settings, tokens and templates. Defaults: (a) all roles with module access, (b) and (c) Full Administrator only. Full Administrator can always reach the settings, so nobody gets locked out. Permissions are checked on the server for every action, not just by hiding buttons. |
 | 12 | How are bulk marketing messages sent? | **Queued, and sent by WHMCS's own cron** in small batches. The admin sets a batch size and a daily cap to stay under Meta's limits. A campaign can be previewed (number of recipients), paused, resumed or cancelled. Consent (`disable_whatsapp` and the marketing opt-in) is checked again just before each message is sent. No new cron job is needed; it uses the WHMCS `AfterCronJob` hook. |
-| 13 | How does the module know a client still needs ID verification? | **No tracking.** The ID verification reminder is a manual, pre-configured message the admin sends from the client profile. |
+| 13 | How does the module know a client still needs ID verification? | **Not needed:** replaced by decision 23 (the ID reminder is removed). |
 | 14 | How long are sent-message logs kept? | **90 days** by default, changeable in settings. Old entries are deleted automatically by the daily cron. The log never stores tokens or secrets. |
 | 15 | What happens when a client replies on WhatsApp? | **Ignored.** The webhook only processes delivery receipts (sent, delivered, read, failed) and "STOP"-type opt-outs. Other replies are thrown away and their text is not stored. Suggestion: the templates should say "replies are not monitored, please open a ticket". |
 | 16 | How flexible are new pre-configured messages? | _being discussed again; my first reading of "ignore for now" was wrong_ |
@@ -40,6 +40,7 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 19 | How is the client's time zone worked out? | **From the client's country, plus state** for countries with several time zones (e.g. US, CA, AU, BR, MX, RU). Uses PHP's built-in time zone list. If unsure, falls back to the WHMCS system time zone. |
 | 20 | Where do "server down" notifications come from? | **Dropped, not built.** So the only critical message that skips the daytime rule is **service suspension**. |
 | 22 | What does a "STOP" reply do? | **Stops WhatsApp only:** it ticks the client's `disable_whatsapp` field, so no more WhatsApp messages are sent. The WHMCS marketing opt-in is never touched. |
+| 23 | Is an ID verification reminder needed? | **No. Removed from the module completely.** |
 | 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
 
 ## The build plan (version 1.0.0)
@@ -96,7 +97,7 @@ This holds even on "nginx only", where `.htaccess` is ignored. `webhook.php` is 
 3. **Sending.** The WHMCS cron (`AfterCronJob` hook) runs `QueueWorker`. It sends to Meta's Graph API,
    saves Meta's message ID and logs the result. Temporary failures are retried a few times with increasing waits.
 4. **Manual send.** A "Send WhatsApp" link on the admin client summary page (`AdminAreaClientSummaryActionLinks` hook)
-   opens the module's send form for that client. You pick a manual message (e.g. ID verification reminder, invoice reminder),
+   opens the module's send form for that client. You pick a manual message (e.g. invoice reminder),
    see a preview, then send (POST + CSRF + role check).
 5. **Bulk marketing.** Pick a marketing message, see "X clients will receive this", then start.
    Recipients are clients with the WHMCS marketing opt-in on and `disable_whatsapp` not ticked. Messages are queued and sent in batches, under the daily cap and the daytime rule.
