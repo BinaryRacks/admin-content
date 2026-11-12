@@ -39,7 +39,7 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 18 | Should messages wait during quiet hours (e.g. at night)? | **Daytime only: 08:00 to 18:00 in the client's own time zone.** Messages triggered outside those hours are queued and sent by the cron when the client's daytime starts. **Critical messages go immediately at any hour:** service suspension and server down notices. |
 | 19 | How is the client's time zone worked out? | **From the client's country, plus state** for countries with several time zones (e.g. US, CA, AU, BR, MX, RU). Uses PHP's built-in time zone list. If unsure, falls back to the WHMCS system time zone. |
 | 20 | Where do "server down" notifications come from? | **Dropped, not built.** So the only critical message that skips the daytime rule is **service suspension**. |
-| 21 | Should the webhook also accept only Meta's IP addresses? | _waiting for answer_ |
+| 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
 
 ## Waiting for
 
