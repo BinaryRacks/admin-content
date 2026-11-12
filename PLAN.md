@@ -41,6 +41,8 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 20 | Where do "server down" notifications come from? | **Dropped, not built.** So the only critical message that skips the daytime rule is **service suspension**. |
 | 22 | What does a "STOP" reply do? | **Stops WhatsApp only:** it ticks the client's `disable_whatsapp` field, so no more WhatsApp messages are sent. The WHMCS marketing opt-in is never touched. |
 | 23 | Is an ID verification reminder needed? | **No. Removed from the module completely.** |
+| 24 | Show a hint when a customer stopped WhatsApp by replying STOP? | **Yes**, text: "Disabled by customer request via WhatsApp message" (with the date). _Where it is shown: waiting for answer._ |
+| 25 | Can other modules send WhatsApp messages through this one? | **Yes, wanted.** _Method being proposed; waiting for approval._ |
 | 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
 
 ## The build plan (version 1.0.0)
