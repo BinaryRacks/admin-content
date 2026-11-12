@@ -131,6 +131,7 @@ Deactivating keeps all of these unless "Delete data on deactivate" is ticked. Th
 | CSRF (forged admin forms) | Every change uses POST plus a token that is checked. |
 | SQL injection | Capsule query builder with bound values only. |
 | An admin doing more than allowed | Role check on the server for every action, not just hidden buttons. |
+| Another module misusing SendApi (spam, wrong client, odd text) | Caller must be in the allowed list; only pre-set messages; values checked for length and characters; a rate limit for each caller; every call logged with the caller's name. |
 | Messaging a client who opted out | Consent is checked when queued AND again just before sending. |
 | Wrong client or number | Phone numbers turned into international format and checked. STOP matches clients by their normalised number. |
 | **Accepted risk:** marketing uses the email opt-in (decision 9), which was given for email rather than WhatsApp. | STOP ticks `disable_whatsapp` only; the email opt-in is never changed by the module. |
