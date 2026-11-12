@@ -81,8 +81,8 @@ docs/
   README.md                 Install, Meta setup, nginx rules, upgrade steps, testing notes
 tests/                      Automated tests (not uploaded to the server)
 ```
-Every PHP file except `webhook.php` and `br_whatsapp.php`/`hooks.php` (which WHMCS loads) starts with
-`if (!defined('WHMCS')) { exit; }`, so opening it directly shows nothing. This holds even on "nginx only", where `.htaccess` is ignored.
+Every PHP file except `webhook.php` starts with `if (!defined('WHMCS')) { exit; }`, so opening it directly shows nothing.
+This holds even on "nginx only", where `.htaccess` is ignored. `webhook.php` is the one public entry point: it starts WHMCS itself and then does the signature check before anything else.
 
 ### How it works
 1. **Automatic events.** `hooks.php` listens to official WHMCS hooks: InvoiceCreated, InvoicePaymentReminder, InvoicePaid,
