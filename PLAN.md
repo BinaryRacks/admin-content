@@ -25,7 +25,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 4 | Which phone number do messages go to? | **The client's main WHMCS phone number**, with its country code. It's converted to international format (E.164). Numbers that are invalid or missing are skipped, and the skip is logged. |
 | 5 | How are notifications linked to Meta's approved message templates? | **Admin types the template name and language**, then picks the WHMCS data that fills each blank (`{{1}}`, `{{2}}` ...) from a fixed, allowed list. The name is checked for format (lowercase letters, numbers, `_`, at most 512 characters). A **"Send test"** button is suggested, so a typo shows up straight away. |
 | 6 | What does `disable_whatsapp` switch off? | **Everything.** A ticked box blocks every WhatsApp message to that client (automatic, manual, bulk and marketing). WHMCS emails are not affected. It's checked again just before each message is sent. |
-| 7 | Who creates the `disable_whatsapp` custom field? | _waiting for answer_ |
+| 7 | Who creates the `disable_whatsapp` custom field? | **The module creates it on activation** if it doesn't exist: a tickbox that clients can edit, shown on their profile. An existing field with the same name is reused. It's never deleted on deactivate (client choices are kept). |
+| 8 | Which automatic events go on the admin checklist? | _waiting for answer_ |
 
 ## Waiting for
 
