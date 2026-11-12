@@ -19,7 +19,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 
 | # | Question | Decision |
 |---|----------|----------|
-| 1 | Admin only, or Client and internet access required? | _waiting for answer_ |
+| 1 | Admin only, or Client and internet access required? | **Client and internet, very limited.** One public entry point only: a webhook that receives messages and receipts from WhatsApp's servers. It has signature checks, rate limits and strict input checks, and everything else in the module folder is denied. |
+| 2 | Which WhatsApp provider? | _waiting for answer_ |
 
 ## Waiting for
 
