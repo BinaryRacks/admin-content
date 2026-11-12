@@ -26,7 +26,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 5 | How are notifications linked to Meta's approved message templates? | **Admin types the template name and language**, then picks the WHMCS data that fills each blank (`{{1}}`, `{{2}}` ...) from a fixed, allowed list. The name is checked for format (lowercase letters, numbers, `_`, at most 512 characters). A **"Send test"** button is suggested, so a typo shows up straight away. |
 | 6 | What does `disable_whatsapp` switch off? | **Everything.** A ticked box blocks every WhatsApp message to that client (automatic, manual, bulk and marketing). WHMCS emails are not affected. It's checked again just before each message is sent. |
 | 7 | Who creates the `disable_whatsapp` custom field? | **The module creates it on activation** if it doesn't exist: a tickbox that clients can edit, shown on their profile. An existing field with the same name is reused. It's never deleted on deactivate (client choices are kept). |
-| 8 | Which automatic events go on the admin checklist? | _waiting for answer_ |
+| 8 | Which automatic events go on the admin checklist? | **All groups:** Invoices (created, reminder due or overdue, payment received), Services (activated or welcome, suspended with reason, unsuspended, terminated), Tickets (staff reply), Domains (registered, renewed, expiring soon). Admin can **switch a whole category on or off** with one switch, and can also turn single events on or off inside a category. A message is sent only if both its category and its event are on. |
+| 9 | Which "marketing enabled" setting decides who gets bulk marketing? | _waiting for answer_ |
 
 ## Waiting for
 
