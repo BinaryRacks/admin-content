@@ -1,6 +1,6 @@
 # PLAN: Binary Racks WhatsApp Notifications (WHMCS addon module)
 
-Status: **gathering requirements** (no code yet, waiting for approval of the plan)
+Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` files will be merged in before building.
 
 ## What you asked for
 
@@ -41,6 +41,106 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 20 | Where do "server down" notifications come from? | **Dropped, not built.** So the only critical message that skips the daytime rule is **service suspension**. |
 | 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
 
+## The build plan (version 1.0.0)
+
+### Name and folder
+- Name shown in WHMCS: **Binary Racks WhatsApp Notifications**, author **Binary Racks**, version **1.0.0**
+- Folder: `modules/addons/br_whatsapp/`
+- Targets PHP 8.3+ and WHMCS 8.x. Uses only documented hooks, `localAPI`, Capsule, `encrypt()` and `decrypt()`.
+
+### Files (one job per file)
+```
+modules/addons/br_whatsapp/
+  .htaccess                 Denies all web access EXCEPT webhook.php
+  br_whatsapp.php           WHMCS entry: config, activate, deactivate, upgrade, admin page router
+  hooks.php                 Connects WHMCS events to the module (no logic, just hand-off)
+  webhook.php               THE ONLY PUBLIC FILE: receives Meta delivery receipts and STOP
+  lib/
+    Branding.php            Header bar: embedded Binary Racks logo (data URI), name and version
+    Schema.php              Creates and upgrades the module's tables automatically
+    Settings.php            Reads and saves settings; secrets go through encrypt()
+    Permissions.php         Which admin roles may: send one, send bulk, change settings
+    Csrf.php                Makes and checks form tokens (every POST)
+    PhoneNumber.php         Turns a WHMCS phone number into international format, or rejects it
+    Consent.php             disable_whatsapp and marketing opt-in checks (asked again at send time)
+    TimeZoneResolver.php    Country plus state, giving a time zone (fallback: WHMCS time zone)
+    DaytimeWindow.php       08:00-18:00 rule; service suspension is exempt
+    Catalogue.php           The built-in events and categories (Invoices, Services, Tickets, Domains)
+    Placeholders.php        Fixed allowed list of WHMCS data that can fill template blanks
+    MessageBuilder.php      Template name, language and blank values, built into one message
+    MetaClient.php          The provider: sends to graph.facebook.com only (fixed host, HTTPS, timeouts)
+    Queue.php               Waiting messages (daytime rule, bulk batches, retries)
+    QueueWorker.php         Run by the WHMCS cron: sends due messages within batch and daily caps
+    Campaigns.php           Bulk marketing: preview count, start, pause, resume, cancel
+    MessageLog.php          Log of sent, delivered, read and failed messages; 90-day clean-up
+    RateLimiter.php         Limits for the webhook and for admin send buttons
+    WebhookHandler.php      Signature check, then receipts and STOP handling
+    EventHandler.php        Turns a WHMCS event into a queued message (with a duplicate guard)
+    views/                  Admin page tabs (all output escaped)
+docs/
+  README.md                 Install, Meta setup, nginx rules, upgrade steps, testing notes
+tests/                      Automated tests (not uploaded to the server)
+```
+Every PHP file except `webhook.php` and `br_whatsapp.php`/`hooks.php` (which WHMCS loads) starts with
+`if (!defined('WHMCS')) { exit; }`, so opening it directly shows nothing. This holds even on "nginx only", where `.htaccess` is ignored.
+
+### How it works
+1. **Automatic events.** `hooks.php` listens to official WHMCS hooks: InvoiceCreated, InvoicePaymentReminder, InvoicePaid,
+   AfterModuleCreate, AfterModuleSuspend (with reason), AfterModuleUnsuspend, AfterModuleTerminate, TicketAdminReply,
+   AfterRegistrarRegistration, AfterRegistrarRenewal, and DailyCronJob (domains expiring soon).
+   Each event is checked in this order: category on, then event on, then client consent, then a valid phone number. It is then queued.
+   A duplicate guard (event + record ID) stops the same notice being sent twice.
+2. **Daytime rule.** A queued message is sent only between 08:00 and 18:00 in the client's local time.
+   Service suspension skips the rule and goes immediately.
+3. **Sending.** The WHMCS cron (`AfterCronJob` hook) runs `QueueWorker`. It sends to Meta's Graph API,
+   saves Meta's message ID and logs the result. Temporary failures are retried a few times with increasing waits.
+4. **Manual send.** A "Send WhatsApp" link on the admin client summary page (`AdminAreaClientSummaryActionLinks` hook)
+   opens the module's send form for that client. You pick a manual message (e.g. ID verification reminder, invoice reminder),
+   see a preview, then send (POST + CSRF + role check).
+5. **Bulk marketing.** Pick a marketing message, see "X clients will receive this", then start.
+   Recipients are clients with the WHMCS marketing opt-in on and `disable_whatsapp` not ticked. Messages are queued and sent in batches, under the daily cap and the daytime rule.
+6. **Webhook.** Meta posts delivery receipts, which update the log. A "STOP"-type reply (STOP, UNSUBSCRIBE, Meta's opt-out button)
+   switches off that client's marketing opt-in through `localAPI UpdateClient`. Other replies are ignored and not stored.
+7. **Settings tab.** Meta Phone Number ID, Business Account ID, access token, app secret, verify token (secrets are typed in, never shown again),
+   language, batch size, daily cap, log retention, roles for each job, and "Delete data on deactivate" (off by default).
+8. **Notifications tab.** Category switches, event checklist, template name, language and blank mapping for each event, and a "Send test" button that sends to a number you type.
+9. **Log tab.** Search by client, status and date.
+
+### Database tables (created and upgraded automatically)
+`mod_brwa_settings`, `mod_brwa_messages` (event and manual messages), `mod_brwa_queue`, `mod_brwa_log`,
+`mod_brwa_campaigns`, `mod_brwa_ratelimit`, `mod_brwa_meta` (schema version).
+Deactivating keeps all of these unless "Delete data on deactivate" is ticked. The `disable_whatsapp` field is never deleted.
+
+### Security risks and how each is handled
+| Risk | Protection |
+|------|-----------|
+| Fake webhook calls (someone pretending to be Meta) | HMAC-SHA256 signature check with the app secret, using a constant-time compare. Unsigned or wrongly signed requests get 403 and are not processed. |
+| Flooding the webhook | Body size limit (64 KB), JSON depth limit, rate limit for each IP address, POST and GET only. |
+| Webhook verify handshake abuse | `hub.verify_token` compared in constant time; `hub.challenge` must be digits only before it is echoed back. |
+| Direct access to other module files | `.htaccess` deny-all; every PHP file in lib/ and views/ exits outside WHMCS; nginx rules in the README. |
+| Stolen or leaked secrets | `encrypt()` at rest, never shown on screen, never logged. If the Phone Number ID or Business Account ID changes, the access token must be typed again. |
+| SSRF (module tricked into calling other hosts) | The Meta host is fixed in code (`graph.facebook.com`) and can't be changed in settings. HTTPS with certificate checks, connect and total timeouts, no redirects. |
+| XSS (script in names, reasons or template fields) | All output escaped. Template names and languages checked against strict patterns. |
+| CSRF (forged admin forms) | Every change uses POST plus a token that is checked. |
+| SQL injection | Capsule query builder with bound values only. |
+| An admin doing more than allowed | Role check on the server for every action, not just hidden buttons. |
+| Messaging a client who opted out | Consent is checked when queued AND again just before sending. |
+| Wrong client or number | Phone numbers turned into international format and checked. STOP matches clients by their normalised number. |
+| **Accepted risk:** marketing uses the email opt-in (decision 9). STOP also turns off email marketing, because it is the same setting. | Recorded; can be changed later. |
+
+### Testing
+- PHPUnit tests with a simulated WHMCS (an in-memory database plus stub `localAPI`, `encrypt` and hooks) and a **simulated Meta API**.
+  No real messages are sent.
+- Covered: every event, both category and event switches, consent, the daytime rule and time zones, the queue and caps, campaigns, the webhook
+  (good and bad signatures, oversized, malformed, replayed), STOP, phone parsing, and permission and CSRF failures.
+- Attack tests: XSS, CSRF, SQL injection, SSRF, secret leaks, direct file access (`../`, `//`, `%2e`, wrong case) on Apache and nginx-only test configs.
+- Browser check with Playwright: admin tabs render with the logo, tables and no console errors.
+- **Security and penetration test:** I'll ask you when the first working version is built, as your rules require.
+
+### Delivery
+One zip: `br_whatsapp-1.0.0.zip` containing `modules/` (to upload) and `docs/` (to keep). Plus the upgrade steps (none for 1.0.0, since it's a first install).
+
 ## Waiting for
 
-- Your security standards `.md` files.
+- Your **YES** to this plan (or changes).
+- Your security standards `.md` files, which I'll merge into this plan before building.
