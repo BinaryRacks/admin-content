@@ -33,7 +33,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 12 | How are bulk marketing messages sent? | **Queued, and sent by WHMCS's own cron** in small batches. The admin sets a batch size and a daily cap to stay under Meta's limits. A campaign can be previewed (number of recipients), paused, resumed or cancelled. Consent (`disable_whatsapp` and the marketing opt-in) is checked again just before each message is sent. No new cron job is needed; it uses the WHMCS `AfterCronJob` hook. |
 | 13 | How does the module know a client still needs ID verification? | **No tracking.** The ID verification reminder is a manual, pre-configured message the admin sends from the client profile. |
 | 14 | How long are sent-message logs kept? | **90 days** by default, changeable in settings. Old entries are deleted automatically by the daily cron. The log never stores tokens or secrets. |
-| 15 | What happens when a client replies on WhatsApp? | _waiting for answer_ |
+| 15 | What happens when a client replies on WhatsApp? | **Ignored.** The webhook only processes delivery receipts (sent, delivered, read, failed) and "STOP"-type opt-outs. Other replies are thrown away and their text is not stored. Suggestion: the templates should say "replies are not monitored, please open a ticket". |
+| 16 | How flexible are new pre-configured messages? | _waiting for answer_ |
 
 ## Waiting for
 
