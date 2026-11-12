@@ -34,7 +34,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 13 | How does the module know a client still needs ID verification? | **No tracking.** The ID verification reminder is a manual, pre-configured message the admin sends from the client profile. |
 | 14 | How long are sent-message logs kept? | **90 days** by default, changeable in settings. Old entries are deleted automatically by the daily cron. The log never stores tokens or secrets. |
 | 15 | What happens when a client replies on WhatsApp? | **Ignored.** The webhook only processes delivery receipts (sent, delivered, read, failed) and "STOP"-type opt-outs. Other replies are thrown away and their text is not stored. Suggestion: the templates should say "replies are not monitored, please open a ticket". |
-| 16 | How flexible are new pre-configured messages? | _waiting for answer_ |
+| 16 | How flexible are new pre-configured messages? | **Postponed.** Version 1 lets the admin add extra *manual* messages (template name plus blanks), which the ID verification and invoice reminders need anyway. Custom *automatic* triggers are left for a later version, and the code is laid out so they can be added without a rewrite. |
+| 17 | Which language are messages sent in? | _waiting for answer_ |
 
 ## Waiting for
 
