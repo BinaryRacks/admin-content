@@ -27,7 +27,8 @@ Status: **gathering requirements** (no code yet, waiting for approval of the pla
 | 6 | What does `disable_whatsapp` switch off? | **Everything.** A ticked box blocks every WhatsApp message to that client (automatic, manual, bulk and marketing). WHMCS emails are not affected. It's checked again just before each message is sent. |
 | 7 | Who creates the `disable_whatsapp` custom field? | **The module creates it on activation** if it doesn't exist: a tickbox that clients can edit, shown on their profile. An existing field with the same name is reused. It's never deleted on deactivate (client choices are kept). |
 | 8 | Which automatic events go on the admin checklist? | **All groups:** Invoices (created, reminder due or overdue, payment received), Services (activated or welcome, suspended with reason, unsuspended, terminated), Tickets (staff reply), Domains (registered, renewed, expiring soon). Admin can **switch a whole category on or off** with one switch, and can also turn single events on or off inside a category. A message is sent only if both its category and its event are on. |
-| 9 | Which "marketing enabled" setting decides who gets bulk marketing? | _waiting for answer_ |
+| 9 | Which "marketing enabled" setting decides who gets bulk marketing? | **WHMCS's built-in email marketing opt-in** (the client's "marketing emails" setting). A client gets bulk marketing only if that is on **and** `disable_whatsapp` is not ticked. *Risk you accepted:* that consent was given for email, not WhatsApp, so Meta may treat it as weaker consent. Incoming "STOP" replies (through the webhook) will untick it automatically. |
+| 10 | Where does the admin send manual messages from? | _waiting for answer_ |
 
 ## Waiting for
 
