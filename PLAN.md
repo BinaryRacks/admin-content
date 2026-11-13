@@ -42,7 +42,7 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
 | 22 | What does a "STOP" reply do? | **Stops WhatsApp only:** it ticks the client's `disable_whatsapp` field, so no more WhatsApp messages are sent, **and writes an entry in the module's message log** (client, phone number, date and time, "Customer requested STOP via WhatsApp, disable_whatsapp ticked"). The WHMCS marketing opt-in is never touched. |
 | 23 | Is an ID verification reminder needed? | **No. Removed from the module completely.** |
-| 24 | Apply GDPR to logs? | **Yes**, see "GDPR and personal data" below. _How long to keep STOP records: waiting for answer._ |
+| 24 | Apply GDPR to logs? | **Yes**, see "GDPR and personal data" below. **STOP records are kept until the client is deleted** (proof of opt-out), and are also removed by an erasure request. All other log entries follow the 90-day rule. |
 
 ## The build plan (version 1.0.0)
 
@@ -122,7 +122,7 @@ Deactivating keeps all of these unless "Delete data on deactivate" is ticked. Th
 - **Error text is cleaned** before it's saved: phone numbers, email addresses and tokens are removed from Meta's error messages.
 - **Queue data is short-lived.** The values for a waiting message are deleted as soon as it's sent or cancelled.
 - **Webhook IP addresses** (used only for rate limits) are stored as a one-way hash and deleted after 1 hour.
-- **Automatic deletion:** log entries are deleted after 90 days (decision 14); finished campaigns keep only totals.
+- **Automatic deletion:** log entries are deleted after 90 days (decision 14), **except STOP records**, which are kept as proof of opt-out until the client is deleted or asks for erasure. Finished campaigns keep only totals.
 - **Right of access:** the Log tab has "Export this client's WhatsApp data" (CSV download, POST + CSRF + role check), for subject access requests.
 - **Right to erasure:** when a client is deleted in WHMCS (`ClientDelete` hook), their log, queue and campaign rows are deleted too.
   A "Delete this client's WhatsApp data" button is also available for erasure requests (role-checked and logged without personal data).
