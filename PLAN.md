@@ -160,7 +160,7 @@ Deactivating keeps all of these unless "Delete data on deactivate" is ticked. Th
 One zip: `br_whatsapp-1.0.0.zip` containing `modules/` (to upload) and `docs/` (to keep). Plus the upgrade steps (none for 1.0.0, since it's a first install).
 
 ## Build status (1.0.0)
-- Module code: `modules/addons/br_whatsapp/` (36 PHP files and one `.htaccess`)
+- Module code: `modules/addons/br_whatsapp/` (38 PHP files and one `.htaccess`)
 - Docs: `docs/README.md` (install, Meta setup, nginx rule, GDPR, troubleshooting) and `docs/CHANGELOG.md`
 - Delivery: `dist/br_whatsapp-1.0.0.zip` (contains `modules/` and `docs/`)
 - Automated tests: 102 tests, 703 checks, all passing (`vendor/bin/phpunit`)
