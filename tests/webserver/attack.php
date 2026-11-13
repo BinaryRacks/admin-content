@@ -3,7 +3,8 @@
  * Web-server security test: attacks the module folder on Apache (.htaccess) and nginx-only servers
  * the way an outsider would, and checks that nothing but webhook.php ever answers with content.
  * Also sends forged and genuine webhook calls through the real web server.
- * Usage: php tests/webserver/attack.php http://127.0.0.1:8081 [more base URLs...]
+ * Usage: php tests/webserver/attack.php [--strict] http://127.0.0.1:8081 [more base URLs...]
+ * --strict = the web server itself must refuse every non-webhook path (status 400+), as with the README rules.
  * Exit code 0 = everything safe. Every attack that ever worked must stay in this list.
  */
 
@@ -53,17 +54,25 @@ $paths = array_merge($paths, [
     'lib/%2E%2E/hooks.php', 'LIB/Settings.php', 'lib/settings.php', 'Br_Whatsapp.php', 'BR_WHATSAPP.PHP', 'lib/Settings.php%00.txt',
     'lib/Settings.php.', 'lib/Settings.php/', 'lib/Settings.php/x.php', 'webhook.php/../lib/Settings.php', 'webhook.php/../../br_whatsapp/hooks.php',
     '.htaccess%20', '.HTACCESS', 'lib/views/settings.php?x=1', 'lib/Settings.php::$DATA', 'lib/Settings.php~', 'lib/Settings.php.bak',
-    '..%2f..%2f..%2finit.php', '%252e%252e/br_whatsapp.php', 'webhook.php%2f..%2flib%2fSettings.php',
+    '%252e%252e/br_whatsapp.php', 'webhook.php%2f..%2flib%2fSettings.php',
 ]);
 
+// Paths that climb OUT of the module folder (to WHMCS's own files): checked for leaks only, never for a 404,
+// because files outside the module are WHMCS's job, not this rule's.
+$escapes = ['..%2f..%2f..%2finit.php', '..%2f..%2f..%2fconfiguration.php'];
+$paths = array_merge($paths, $escapes);
+
+$args = array_slice($argv, 1);
+$strict = in_array('--strict', $args, true);
 $failures = 0;
-foreach (array_slice($argv, 1) as $base) {
+foreach (array_diff($args, ['--strict']) as $base) {
     $checked = 0;
     foreach ($paths as $path) {
         [$status, $body] = request($base . MODULE . $path);
         $checked++;
         // Safe = an error status, or an empty page. Never module content.
-        $safe = !leaks($body) && ($status >= 400 || trim($body) === '');
+        $mustRefuse = $strict && !in_array($path, $escapes, true);
+        $safe = !leaks($body) && ($status >= 400 || (!$mustRefuse && trim($body) === ''));
         if (!$safe) {
             $failures++;
             echo "LEAK  $base " . MODULE . "$path -> $status " . substr(preg_replace('/\s+/', ' ', $body), 0, 120) . "\n";
@@ -75,8 +84,9 @@ foreach (array_slice($argv, 1) as $base) {
         'metadata' => ['phone_number_id' => '123456789012'],
         'messages' => [['from' => '447911123456', 'type' => 'text', 'text' => ['body' => 'STOP']]]]]]]]]);
     $checks = [
-        'unsigned POST refused'      => [request($base . MODULE . 'webhook.php', 'POST', $stop, ['Content-Type: application/json']), 403],
-        'wrong signature refused'    => [request($base . MODULE . 'webhook.php', 'POST', $stop, ['X-Hub-Signature-256: sha256=' . str_repeat('0', 64)]), 403],
+        // 429 also counts as refused: the bad-signature limiter blocks repeated test runs from the same address.
+        'unsigned POST refused'      => [request($base . MODULE . 'webhook.php', 'POST', $stop, ['Content-Type: application/json']), [403, 429]],
+        'wrong signature refused'    => [request($base . MODULE . 'webhook.php', 'POST', $stop, ['X-Hub-Signature-256: sha256=' . str_repeat('0', 64)]), [403, 429]],
         'verify with wrong token'    => [request($base . MODULE . 'webhook.php?hub.mode=subscribe&hub.verify_token=x&hub.challenge=123'), 403],
         'verify challenge XSS'       => [request($base . MODULE . 'webhook.php?hub.mode=subscribe&hub.verify_token=verify-token-1234567890&hub.challenge=%3Cscript%3E'), 400],
         'verify correct'             => [request($base . MODULE . 'webhook.php?hub.mode=subscribe&hub.verify_token=verify-token-1234567890&hub.challenge=4242'), 200],
@@ -85,7 +95,7 @@ foreach (array_slice($argv, 1) as $base) {
         'genuine signed STOP'        => [request($base . MODULE . 'webhook.php', 'POST', $stop, ['X-Hub-Signature-256: sha256=' . hash_hmac('sha256', $stop, SECRET)]), 200],
     ];
     foreach ($checks as $name => [[$status, $body], $expected]) {
-        $ok = $status === $expected && !leaks($body) && ($name !== 'verify challenge XSS' || !str_contains($body, '<script'));
+        $ok = in_array($status, (array) $expected, true) && !leaks($body) && ($name !== 'verify challenge XSS' || !str_contains($body, '<script'));
         if (!$ok) {
             $failures++;
         }

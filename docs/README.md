@@ -59,15 +59,24 @@ WhatsApp only allows messages you start yourself if they use a **template approv
 ## 5. Web server rules (only webhook.php is public)
 **Apache / LiteSpeed:** the included `.htaccess` already denies everything except `webhook.php`.
 
-**nginx only** (`.htaccess` is ignored): add this inside the site's `server { }` block
-(Plesk: Websites & Domains → Apache & nginx Settings → Additional nginx directives):
+**nginx only** (`.htaccess` is ignored): add this in
+Plesk → Websites & Domains → Apache & nginx Settings → **Additional nginx directives**:
 ```nginx
-# Binary Racks WhatsApp: block everything in the module folder except webhook.php
-location ~* ^/modules/addons/br_whatsapp/(?!webhook\.php$) {
+# Binary Racks WhatsApp: only webhook.php is reachable; everything else in the module folder gets 404.
+# "^~" makes this rule win over Plesk's own PHP handler, whatever order Plesk puts the rules in.
+location ^~ /modules/addons/br_whatsapp/ {
+    location = /modules/addons/br_whatsapp/webhook.php {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        # Your site's PHP-FPM socket (Plesk's usual path; check it under the site's PHP settings).
+        fastcgi_pass unix:/var/www/vhosts/system/<your-domain>/php-fpm.sock;
+    }
     return 404;
 }
 ```
-(We will confirm this rule on your server together during the security test.)
+After saving, check from your computer: `https://<your-whmcs>/modules/addons/br_whatsapp/lib/Settings.php`
+must show **404**, and `.../webhook.php` must show **Forbidden** (403).
+
 Even without these rules nothing leaks: every other PHP file in the module stops immediately with an empty page
 when opened outside WHMCS, and the folder holds no images, scripts or styles.
 

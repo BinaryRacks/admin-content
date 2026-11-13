@@ -29,3 +29,8 @@ all with PHP 8.3 (tests/webserver/attack.php, 67 direct-access tricks per server
 | 4 | Low | Wrong verify-token attempts (GET handshake) don't count toward the stricter "bad attempt" limit. Guessing a 16+ character token is still impossible in practice. | By reading the code |
 | 5 | Low (reliability) | Starting a very large campaign queues every recipient inside one admin page request; tens of thousands of clients could hit PHP's time limit and leave a half-queued campaign. | By reading the code |
 | 6 | Info | A STOP from a phone number shared by several client accounts ticks `disable_whatsapp` on all of them. | Test `testStopFromUnknownNumberChangesNoClient` and code |
+
+## Decisions and fixes
+| # | Decision | What was done | Proof |
+|---|----------|---------------|-------|
+| 1 | **Fix** | README nginx rule replaced by a `location ^~` rule that wins over Plesk's PHP handler; only `webhook.php` is passed to PHP, everything else in the folder gets 404. The rule is kept in `tests/webserver/nginx-module-rule.conf`. `tests/webserver/attack.php --strict` now requires the server itself to refuse every non-webhook path. | Strict run: Apache and nginx-with-rule ALL SAFE (68 paths each). nginx without the rule: 50 paths answered and `.htaccess` readable, so the test catches a missing rule. |

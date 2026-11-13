@@ -170,3 +170,8 @@ One zip: `br_whatsapp-1.0.0.zip` containing `modules/` (to upload) and `docs/` (
 ## Waiting for
 - Your OK to start the **security and penetration test** (first working version is ready).
 - Your security standards `.md` files (optional; the code will be checked against them).
+
+## Security test decisions (1.0.0)
+| Finding | Decision |
+|---------|----------|
+| 1. nginx rule didn't block PHP files on Plesk | **Fix**: stronger `^~` rule in README, strict web-server test |
