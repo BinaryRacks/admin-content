@@ -1,0 +1,13 @@
+{
+    "name": "binaryracks/br-whatsapp-dev",
+    "description": "Development and test tools for the Binary Racks WhatsApp WHMCS module (not uploaded to the server).",
+    "type": "project",
+    "license": "proprietary",
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "illuminate/database": "^10.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
