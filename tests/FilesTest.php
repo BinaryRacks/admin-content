@@ -129,7 +129,8 @@ final class FilesTest extends \PHPUnit\Framework\TestCase
     {
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(BRWA_ROOT, FilesystemIterator::SKIP_DOTS));
         foreach ($files as $file) {
-            $code = (string) file_get_contents($file->getPathname());
+            // Embedded images (data: URIs) are random-looking text, so they are left out of the token check.
+            $code = (string) preg_replace('#data:image/[a-z+]+;base64,[A-Za-z0-9+/=]+#', '', (string) file_get_contents($file->getPathname()));
             $this->assertDoesNotMatchRegularExpression('/EAA[A-Za-z0-9]{20,}/', $code, 'no Meta token in code');
             $this->assertDoesNotMatchRegularExpression('/<(script|link|img)[^>]+(src|href)="https?:/i', $code, 'no external scripts, styles or images');
             $this->assertStringNotContainsString('->raw(', $code . '', 'no raw SQL built from text');

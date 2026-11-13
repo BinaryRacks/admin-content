@@ -165,9 +165,8 @@ One zip: `br_whatsapp-1.0.0.zip` containing `modules/` (to upload) and `docs/` (
 - Delivery: `dist/br_whatsapp-1.0.0.zip` (contains `modules/` and `docs/`)
 - Automated tests: 102 tests, 703 checks, all passing (`vendor/bin/phpunit`)
 - Browser check: every tab passes at desktop and phone width (logo, tables, no console errors)
-- Placeholder logo in `lib/Branding.php`: replace it with the official Binary Racks logo
+- Official Binary Racks logo embedded in `lib/Branding.php` (PNG data URI, no image file)
 
 ## Waiting for
-- The official Binary Racks logo file (SVG or PNG), to embed in place of the placeholder.
 - Your OK to start the **security and penetration test** (first working version is ready).
 - Your security standards `.md` files (optional; the code will be checked against them).

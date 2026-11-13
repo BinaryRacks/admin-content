@@ -39,7 +39,7 @@ final class AdminPagesTest extends TestCase
     {
         foreach (['dashboard', 'notifications', 'messages', 'marketing', 'log', 'settings'] as $tab) {
             $html = $this->page($tab);
-            $this->assertStringContainsString('src="data:image/svg+xml;base64,', $html, $tab);
+            $this->assertStringContainsString('src="data:image/png;base64,', $html, $tab);
             $this->assertStringContainsString('Binary Racks WhatsApp Notifications', $html, $tab);
             $this->assertStringContainsString('v1.0.0', $html, $tab);
             $this->assertStringNotContainsString('Something went wrong', $html, $tab);
