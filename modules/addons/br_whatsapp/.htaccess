@@ -1,0 +1,19 @@
+# Binary Racks WhatsApp module: deny all web access to this folder,
+# except webhook.php, which Meta's servers must be able to call.
+# (Every PHP file also stops by itself when opened outside WHMCS, for nginx-only servers.)
+
+<IfModule mod_authz_core.c>
+    # Apache 2.4
+    Require all denied
+    <Files "webhook.php">
+        Require all granted
+    </Files>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    # Apache 2.2
+    Order deny,allow
+    Deny from all
+    <Files "webhook.php">
+        Allow from all
+    </Files>
+</IfModule>
