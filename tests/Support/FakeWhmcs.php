@@ -23,13 +23,13 @@ final class FakeWhmcs
     /** Calling codes for the test countries. */
     private const CALLING_CODES = ['GB' => '44', 'US' => '1', 'AU' => '61', 'DE' => '49', 'IT' => '39'];
 
-    /** Starts a fresh, empty in-memory database with the WHMCS tables. */
-    public static function reset(): void
+    /** Starts a fresh, empty database with the WHMCS tables (in memory unless a file path is given). */
+    public static function reset(string $database = ':memory:'): void
     {
         self::$apiCalls = [];
         self::$activity = [];
         $capsule = new Manager();
-        $capsule->addConnection(['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => '']);
+        $capsule->addConnection(['driver' => 'sqlite', 'database' => $database, 'prefix' => '']);
         $capsule->setAsGlobal();
         $schema = Manager::schema();
 
