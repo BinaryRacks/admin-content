@@ -42,6 +42,7 @@ Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` 
 | 21 | Should the webhook also accept only Meta's IP addresses? | **Signature only**, as Meta recommends. No IP list to maintain. Rate limits and size limits still apply. |
 | 22 | What does a "STOP" reply do? | **Stops WhatsApp only:** it ticks the client's `disable_whatsapp` field, so no more WhatsApp messages are sent, **and writes an entry in the module's message log** (client, phone number, date and time, "Customer requested STOP via WhatsApp, disable_whatsapp ticked"). The WHMCS marketing opt-in is never touched. |
 | 23 | Is an ID verification reminder needed? | **No. Removed from the module completely.** |
+| 24 | Apply GDPR to logs? | **Yes**, see "GDPR and personal data" below. _How long to keep STOP records: waiting for answer._ |
 
 ## The build plan (version 1.0.0)
 
@@ -113,6 +114,21 @@ This holds even on "nginx only", where `.htaccess` is ignored. `webhook.php` is 
 `mod_brwa_settings`, `mod_brwa_messages` (event and manual messages), `mod_brwa_queue`, `mod_brwa_log`,
 `mod_brwa_campaigns`, `mod_brwa_ratelimit`, `mod_brwa_meta` (schema version).
 Deactivating keeps all of these unless "Delete data on deactivate" is ticked. The `disable_whatsapp` field is never deleted.
+
+### GDPR and personal data (logs, queue, campaigns)
+- **Store as little as possible.** The log keeps: client ID, **masked phone number** (e.g. `+44 ••••• ••1234`), message key,
+  WHMCS record ID (invoice, service or domain number), status, Meta message ID, error code, date and time.
+  It does **not** keep the filled-in message text, client names, suspension reasons or reply text.
+- **Error text is cleaned** before it's saved: phone numbers, email addresses and tokens are removed from Meta's error messages.
+- **Queue data is short-lived.** The values for a waiting message are deleted as soon as it's sent or cancelled.
+- **Webhook IP addresses** (used only for rate limits) are stored as a one-way hash and deleted after 1 hour.
+- **Automatic deletion:** log entries are deleted after 90 days (decision 14); finished campaigns keep only totals.
+- **Right of access:** the Log tab has "Export this client's WhatsApp data" (CSV download, POST + CSRF + role check), for subject access requests.
+- **Right to erasure:** when a client is deleted in WHMCS (`ClientDelete` hook), their log, queue and campaign rows are deleted too.
+  A "Delete this client's WhatsApp data" button is also available for erasure requests (role-checked and logged without personal data).
+- **Who can see logs:** only admin roles allowed in the settings. Logs are never written to WHMCS's module log with personal data.
+- **Docs:** `docs/README.md` gets a short GDPR section: what's stored, why (lawful basis: contract for service notices,
+  consent for marketing), how long, and the text to add to your privacy policy (Meta processes the messages).
 
 ### Security risks and how each is handled
 | Risk | Protection |
