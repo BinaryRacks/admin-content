@@ -1,6 +1,6 @@
 # PLAN: Binary Racks WhatsApp Notifications (WHMCS addon module)
 
-Status: **plan ready, waiting for your YES** (no code yet). Your security `.md` files will be merged in before building.
+Status: **version 1.0.0 built and tested** (plan approved on 2026-11-13). Next: security and penetration test, run with you step by step. Your security `.md` files are still welcome and will be checked against the code.
 
 ## What you asked for
 
@@ -159,7 +159,15 @@ Deactivating keeps all of these unless "Delete data on deactivate" is ticked. Th
 ### Delivery
 One zip: `br_whatsapp-1.0.0.zip` containing `modules/` (to upload) and `docs/` (to keep). Plus the upgrade steps (none for 1.0.0, since it's a first install).
 
-## Waiting for
+## Build status (1.0.0)
+- Module code: `modules/addons/br_whatsapp/` (36 PHP files and one `.htaccess`)
+- Docs: `docs/README.md` (install, Meta setup, nginx rule, GDPR, troubleshooting) and `docs/CHANGELOG.md`
+- Delivery: `dist/br_whatsapp-1.0.0.zip` (contains `modules/` and `docs/`)
+- Automated tests: 102 tests, 703 checks, all passing (`vendor/bin/phpunit`)
+- Browser check: every tab passes at desktop and phone width (logo, tables, no console errors)
+- Placeholder logo in `lib/Branding.php`: replace it with the official Binary Racks logo
 
-- Your **YES** to this plan (or changes).
-- Your security standards `.md` files, which I'll merge into this plan before building.
+## Waiting for
+- The official Binary Racks logo file (SVG or PNG), to embed in place of the placeholder.
+- Your OK to start the **security and penetration test** (first working version is ready).
+- Your security standards `.md` files (optional; the code will be checked against them).
